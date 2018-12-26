@@ -94,7 +94,6 @@ public class RestClientController {
 		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
 		
 		log.info("ABOUT TO RETURN CONTROLLER");
-		geoLocFuture.get();
 		return geoLocFuture;		
 	}
 		
