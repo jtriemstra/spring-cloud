@@ -86,8 +86,8 @@ public class RestClientController {
 		return deferredResult;		
 	}
 	
-	//Async, request and processing handled on different threads, but how do I tell it that processing is complete?
-	@RequestMapping(value = "/coordsAsync3", method = RequestMethod.GET)
+	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
+	@RequestMapping(value = "/coordsAsync5", method = RequestMethod.GET)
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync3() {
 		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
@@ -97,7 +97,7 @@ public class RestClientController {
 		return geoLocFuture;		
 	}
 		
-	//Async, request and processing handled on different threads, but how do I tell it that processing is complete?
+	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
 	@RequestMapping(value = "/coordsAsync4", method = RequestMethod.GET)
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync4() {
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
