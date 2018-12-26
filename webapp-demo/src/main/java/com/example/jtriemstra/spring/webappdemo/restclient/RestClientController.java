@@ -88,12 +88,13 @@ public class RestClientController {
 	
 	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
 	@RequestMapping(value = "/coordsAsync3", method = RequestMethod.GET)
-	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync3() {
+	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync3() throws Exception {
 		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
 		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
 		
 		log.info("ABOUT TO RETURN CONTROLLER");
+		geoLocFuture.get();
 		return geoLocFuture;		
 	}
 		
@@ -104,7 +105,20 @@ public class RestClientController {
 		
 		return geoLocFuture;		
 	}
+	
+
+	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
+	@RequestMapping(value = "/coordsAsync5", method = RequestMethod.GET)
+	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync5() throws Exception {
+		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
+		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
 		
+		log.info("ABOUT TO RETURN CONTROLLER");
+		geoLocFuture.get();
+		return geoLocFuture;		
+	}
+	
 	//Basic sync call
 	@RequestMapping(value="/conditionsHardCoded", method = RequestMethod.GET)
 	public WeatherModel getConditionsHardCoded() {
