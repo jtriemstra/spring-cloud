@@ -148,6 +148,17 @@ public class RestClientController {
 		}		
 	}
 	
+	//Async, request and processing handled on different threads
+	@RequestMapping(value = "/conditionsAsync", method = RequestMethod.GET)
+	public DeferredResult<ResponseEntity<WeatherModel>> getConditionsAsync() {
+		DeferredResult<ResponseEntity<WeatherModel>> deferredResult = new DeferredResult<>();
+		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		geoLocFuture.addCallback(new CoordsWeatherCallback(deferredResult));
+		
+		log.info("ABOUT TO RETURN CONTROLLER");
+		return deferredResult;		
+	}
+	
 	public class CoordsCallback implements ListenableFutureCallback<ResponseEntity<GeoLocModel>> {
 		private DeferredResult deferredResult; 
 		
@@ -171,5 +182,53 @@ public class RestClientController {
             deferredResult.setResult(responseEntity);
         }
 	}
+
+	public class CoordsWeatherCallback implements ListenableFutureCallback<ResponseEntity<GeoLocModel>> {
+		private DeferredResult deferredResult; 
+		
+		public CoordsWeatherCallback(DeferredResult deferredResult) {
+			this.deferredResult = deferredResult;			
+		}
+		
+		@Override
+        public void onSuccess(ResponseEntity<GeoLocModel> result) {
+			GeoLocModel location = result.getBody();
+			ListenableFuture<ResponseEntity<WeatherModel>> conditionsFuture = weatherProxy.getConditionsAsync(location.getLat(), location.getLon());
+			conditionsFuture.addCallback(new WeatherCallback(deferredResult));	
+			//deferredResult.setResult(ResponseEntity.ok(result.getBody()));
+            log.info("SUCCESS CALLBACK COMPLETE");
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            log.error("Failed to fetch result from remote service", t);
+            ResponseEntity<Void> responseEntity = 
+                new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+            deferredResult.setResult(responseEntity);
+        }
+	}
 	
+	public class WeatherCallback implements ListenableFutureCallback<ResponseEntity<WeatherModel>> {
+		private DeferredResult deferredResult; 
+		
+		public WeatherCallback(DeferredResult deferredResult) {
+			this.deferredResult = deferredResult;			
+		}
+		
+		@Override
+        public void onSuccess(ResponseEntity<WeatherModel> result) {
+            //ResponseEntity<GeoLocModel> responseEntity = 
+            //    new ResponseEntity<>(result, HttpStatus.OK);
+            deferredResult.setResult(ResponseEntity.ok(result.getBody()));
+            log.info("SUCCESS CALLBACK COMPLETE");
+        }
+
+        @Override
+        public void onFailure(Throwable t) {
+            log.error("Failed to fetch result from remote service", t);
+            ResponseEntity<Void> responseEntity = 
+                new ResponseEntity<>(HttpStatus.SERVICE_UNAVAILABLE);
+            deferredResult.setResult(responseEntity);
+        }
+	}
 }
