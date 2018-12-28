@@ -35,13 +35,13 @@ public class RestClientController {
 	WeatherProxy weatherProxy;
 	
 	//Basic sync call
-	@RequestMapping(value = "/old/coords", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coords", method = RequestMethod.GET)
 	public GeoLocModel getCoords() {
 		return geoLocProxy.getCoords();
 	}
 
 	//Call using async classes, but blocking
-	@RequestMapping(value = "/old/coordsAsync", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coordsAsync", method = RequestMethod.GET)
 	public GeoLocModel getCoordsAsync() {
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
 		
@@ -80,7 +80,7 @@ public class RestClientController {
 	}*/
 
 	//Async, request and processing handled on different threads
-	@RequestMapping(value = "/old/coordsAsync2", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coordsAsync2", method = RequestMethod.GET)
 	public DeferredResult<ResponseEntity<GeoLocModel>> getCoordsAsync2() {
 		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
@@ -91,7 +91,7 @@ public class RestClientController {
 	}
 	
 	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/old/coordsAsync3", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coordsAsync3", method = RequestMethod.GET)
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync3() throws Exception {
 		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
@@ -102,7 +102,7 @@ public class RestClientController {
 	}
 		
 	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/old/coordsAsync4", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coordsAsync4", method = RequestMethod.GET)
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync4() {
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
 		
@@ -111,7 +111,7 @@ public class RestClientController {
 	
 
 	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/old/coordsAsync5", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/coordsAsync5", method = RequestMethod.GET)
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync5() throws Exception {
 		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
@@ -123,13 +123,13 @@ public class RestClientController {
 	}
 	
 	//Basic sync call
-	@RequestMapping(value="/old/conditionsHardCoded", method = RequestMethod.GET)
+	@RequestMapping(value="/art/conditionsHardCoded", method = RequestMethod.GET)
 	public WeatherModel getConditionsHardCoded() {
 		return weatherProxy.getConditions("37.8267","-122.4233");
 	}
 	
 	//Call using async classes but blocking
-	@RequestMapping(value = "/old/conditions", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/conditions", method = RequestMethod.GET)
 	public WeatherModel getConditions() {
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
 		
@@ -153,7 +153,7 @@ public class RestClientController {
 	}
 	
 	//Async, request and processing handled on different threads
-	@RequestMapping(value = "/old/conditionsAsync", method = RequestMethod.GET)
+	@RequestMapping(value = "/art/conditionsAsync", method = RequestMethod.GET)
 	public DeferredResult<ResponseEntity<WeatherModel>> getConditionsAsync() {
 		DeferredResult<ResponseEntity<WeatherModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
