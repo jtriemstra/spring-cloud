@@ -1,4 +1,4 @@
-package com.example.jtriemstra.spring.webappdemo.restclient;
+package com.example.jtriemstra.spring.webappdemo.async;
 
 import java.util.Map;
 

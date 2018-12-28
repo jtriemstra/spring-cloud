@@ -1,4 +1,4 @@
-package com.example.jtriemstra.spring.webappdemo.restclient;
+package com.example.jtriemstra.spring.webappdemo.async.deprecated;
 
 import java.util.concurrent.ExecutionException;
 
@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
+
+import com.example.jtriemstra.spring.webappdemo.async.GeoLocModel;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +27,7 @@ public class GeoLocProxy {
 	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync() {
 		AsyncRestTemplate restTemplate = new AsyncRestTemplate();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = restTemplate.getForEntity(IP_URL, GeoLocModel.class);
+		log.info("GEO PROXY CALL RETURNING");
 		return geoLocFuture;
 	}
 	
