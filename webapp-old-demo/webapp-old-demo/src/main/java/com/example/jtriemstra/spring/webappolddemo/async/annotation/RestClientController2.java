@@ -1,12 +1,14 @@
-package com.example.jtriemstra.spring.webappolddemo.async.asyncresttemplate;
+package com.example.jtriemstra.spring.webappolddemo.async.annotation;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -27,27 +29,30 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @EnableWebMvc
 @Slf4j
-public class RestClientController {
+public class RestClientController2 {
 	
 	@Autowired
-	GeoLocProxy geoLocProxy;
+	GeoLocProxy2 geoLocProxy;
 	
 	@Autowired
-	WeatherProxy weatherProxy;
+	WeatherProxy2 weatherProxy;
 	
 	//Basic sync call
-	@RequestMapping(value = "/art/coords", method = RequestMethod.GET)
+	@RequestMapping(value = "/ann/coords", method = RequestMethod.GET)
 	public GeoLocModel getCoords() {
 		return geoLocProxy.getCoords();
 	}
 
-	//Call using async classes, but blocking
-	@RequestMapping(value = "/art/coordsAsync", method = RequestMethod.GET)
+	//Returns quickly
+	@RequestMapping(value = "/ann/coordsAsync", method = RequestMethod.GET)
 	public GeoLocModel getCoordsAsync() {
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		log.info("calling async proxy");
+		Future<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		log.info("proxy returned");
 		
 		try {
-			ResponseEntity<GeoLocModel> response = geoLocFuture.get();			
+			ResponseEntity<GeoLocModel> response = geoLocFuture.get();
+			log.info("response ready");
 			return response.getBody();
 		}
 		catch (ExecutionException ex) {
@@ -60,101 +65,96 @@ public class RestClientController {
 		}		
 	}
 	
-	//Call using async classes, but blocking
-	/*@RequestMapping(value = "/old/coordsAsync1", method = RequestMethod.GET)
+	//Returns quickly
+	@RequestMapping(value = "/ann/coordsAsync1", method = RequestMethod.GET)
 	public GeoLocModel getCoordsAsync1() {
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
-		CompletableFuture<ResponseEntity<GeoLocModel>> response = geoLocFuture.completable();
-		CompletableFuture.allOf(response);
+		log.info("calling async proxy 1");
+		Future<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync1();
+		log.info("proxy returned");
 		
 		try {
-			return response.get().getBody();
+			ResponseEntity<GeoLocModel> response = geoLocFuture.get();
+			log.info("response ready");
+			return response.getBody();
 		}
 		catch (ExecutionException ex) {
 			log.error("Error waiting for async execution", ex);
 			return null;
+		} catch (InterruptedException ex) {
+			log.error("Error waiting for async execution", ex);
+			return null;
 		}
-		catch (InterruptedException ex) {
+	}
+
+	//Takes a long time to return
+	@RequestMapping(value = "/ann/coordsAsync2", method = RequestMethod.GET)
+	public CompletableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync2() {
+		CompletableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		
+		log.info("ABOUT TO RETURN CONTROLLER");
+		return geoLocFuture;		
+	}
+	
+	//Takes a long time to return
+	@RequestMapping(value = "/ann/coordsAsync3", method = RequestMethod.GET)
+	public ResponseEntity<GeoLocModel> getCoordsAsync3() throws Exception {
+		CompletableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		
+		log.info("ABOUT TO RETURN CONTROLLER");
+		return geoLocFuture.get();		
+	}
+	
+	//Returns quickly
+	@RequestMapping(value = "/ann/coordsAsync4", method = RequestMethod.GET)
+	public GeoLocModel getCoordsAsync4() {
+		log.info("calling async proxy 2");
+		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync2();
+		log.info("proxy returned");
+		
+		try {
+			ResponseEntity<GeoLocModel> response = geoLocFuture.get();
+			log.info("response ready");
+			return response.getBody();
+		}
+		catch (ExecutionException ex) {
+			log.error("Error waiting for async execution", ex);
+			return null;
+		} catch (InterruptedException ex) {
 			log.error("Error waiting for async execution", ex);
 			return null;
 		}		
-	}*/
-
-	//Async, request and processing handled on different threads
-	@RequestMapping(value = "/art/coordsAsync2", method = RequestMethod.GET)
-	public DeferredResult<ResponseEntity<GeoLocModel>> getCoordsAsync2() {
-		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
-		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
-		
-		log.info("ABOUT TO RETURN CONTROLLER");
-		return deferredResult;		
-	}
-	
-	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/art/coordsAsync3", method = RequestMethod.GET)
-	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync3() throws Exception {
-		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
-		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
-		
-		log.info("ABOUT TO RETURN CONTROLLER");
-		return geoLocFuture;		
-	}
-		
-	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/art/coordsAsync4", method = RequestMethod.GET)
-	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync4() {
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
-		
-		return geoLocFuture;		
 	}
 	
 
-	//Async, request and processing handled on different threads, but how do I tell it that processing is complete? Takes forever to return
-	@RequestMapping(value = "/art/coordsAsync5", method = RequestMethod.GET)
-	public ListenableFuture<ResponseEntity<GeoLocModel>> getCoordsAsync5() throws Exception {
-		DeferredResult<ResponseEntity<GeoLocModel>> deferredResult = new DeferredResult<>();
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
-		geoLocFuture.addCallback(new CoordsCallback(deferredResult));
-		
-		log.info("ABOUT TO RETURN CONTROLLER");
-		geoLocFuture.get();
-		return geoLocFuture;		
-	}
-	
-	//Basic sync call
-	@RequestMapping(value="/art/conditionsHardCoded", method = RequestMethod.GET)
-	public WeatherModel getConditionsHardCoded() {
-		return weatherProxy.getConditions("37.8267","-122.4233");
-	}
-	
-	//Call using async classes but blocking
-	@RequestMapping(value = "/art/conditions", method = RequestMethod.GET)
+	@RequestMapping(value = "/ann/conditions", method = RequestMethod.GET)
 	public WeatherModel getConditions() {
-		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
+		log.info("calling async proxy 2");
+		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync2();
+		log.info("proxy returned");
 		
 		try {
-			ResponseEntity<GeoLocModel> response = geoLocFuture.get();			
+			ResponseEntity<GeoLocModel> response = geoLocFuture.get();
+			log.info("response ready");
+			
 			GeoLocModel location = response.getBody();
-			
-			ListenableFuture<ResponseEntity<WeatherModel>> conditionsFuture = weatherProxy.getConditionsAsync(location.getLat(), location.getLon());
-			WeatherModel conditions = conditionsFuture.get().getBody();
-			
-			return conditions;
+			log.info("calling weather proxy 2");
+			ListenableFuture<ResponseEntity<WeatherModel>> weatherFuture = weatherProxy.getConditionsAsync(location.getLat(), location.getLon());
+			log.info("weather proxy returned");
+			ListenableFuture<ResponseEntity<WeatherModel>> weatherFuture2 = weatherProxy.getConditionsAsync(location.getLat(), location.getLon());
+			ListenableFuture<ResponseEntity<WeatherModel>> weatherFuture3 = weatherProxy.getConditionsAsync(location.getLat(), location.getLon());
+			return weatherFuture.get().getBody();
 		}
 		catch (ExecutionException ex) {
 			log.error("Error waiting for async execution", ex);
 			return null;
-		}
-		catch (InterruptedException ex) {
+		} catch (InterruptedException ex) {
 			log.error("Error waiting for async execution", ex);
 			return null;
 		}		
 	}
 	
 	//Async, request and processing handled on different threads
-	@RequestMapping(value = "/art/conditionsAsync", method = RequestMethod.GET)
+	/*@RequestMapping(value = "/ann/conditionsAsync", method = RequestMethod.GET)
 	public DeferredResult<ResponseEntity<WeatherModel>> getConditionsAsync() {
 		DeferredResult<ResponseEntity<WeatherModel>> deferredResult = new DeferredResult<>();
 		ListenableFuture<ResponseEntity<GeoLocModel>> geoLocFuture = geoLocProxy.getCoordsAsync();
@@ -162,7 +162,7 @@ public class RestClientController {
 		
 		log.info("ABOUT TO RETURN CONTROLLER");
 		return deferredResult;		
-	}
+	}*/
 	
 	//Two async calls in parallel
 	/*@RequestMapping(value = "/old/parallelHardCoded", method = RequestMethod.GET)

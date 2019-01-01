@@ -2,6 +2,7 @@ package com.example.jtriemstra.spring.webappolddemo.async.asyncresttemplate;
 
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.concurrent.ListenableFuture;
