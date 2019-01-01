@@ -20,6 +20,12 @@ public class AsyncConfiguration extends WebMvcConfigurationSupport {
 	public ThreadPoolTaskExecutor mvcTaskExecutor() {
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
 		taskExecutor.setThreadGroupName("mvc-executor");
+		taskExecutor.setCorePoolSize(3);
+		taskExecutor.setMaxPoolSize(10);
+		taskExecutor.setQueueCapacity(500);
+        //taskExecutor.initialize();
 		return taskExecutor;
 	}
+	
+	
 }
